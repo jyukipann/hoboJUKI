@@ -16,7 +16,7 @@ conda 環境を構築する。pythonバージョンは3.7として、極力conda
 ```
 conda create -n hoboJUKI python=3.7
 conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-conda install -c conda-forge transformers
+conda install -c huggingface transformers
 conda install -c anaconda tensorflow-gpu
 conda install -c conda-forge tensorboard
 conda install -c conda-forge sentencepiece
@@ -25,3 +25,5 @@ pip install fugashi
 pip install fugashi[unidic]
 python -m unidic download
 ```
+
+conda update -n base -c defaults conda

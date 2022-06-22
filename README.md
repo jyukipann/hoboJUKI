@@ -12,16 +12,16 @@
 チャットボットとしての体裁を整える
 
 ## 環境構築
-conda 環境を構築する。pythonバージョンは3.7として、極力conda installで行うが無理な場合はpip installを使う。開発で使うメインPCのcudaバージョンは11.1だった。
+conda 環境を構築する。pythonバージョンは3.10として、すべてpipでインストールした
+まずhttps://huggingface.co/rinna/japanese-gpt-1b/tree/mainをクローンした。これもクローンhttps://github.com/rinnakk/japanese-pretrained-models。
 ```
-conda create -n hoboJUKI python=3.7
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-conda install -c conda-forge transformers
-conda install -c anaconda tensorflow-gpu
-conda install -c conda-forge tensorboard
-conda install -c conda-forge sentencepiece
-conda install -c conda-forge tqdm
-pip install fugashi
-pip install fugashi[unidic]
+git lfs install
+conda create -n hoboJUKI
+conda activate hoboJUKI
+cd pathto/japanese-pretrained-models
+pip install -r requirements.txt
 python -m unidic download
+pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+pip install transformers
+pip install sentencepiece
 ```

@@ -13,12 +13,11 @@
 
 ## 環境構築
 conda 環境を構築する。pythonバージョンは3.10として、すべてpipでインストールした
-まずhttps://huggingface.co/rinna/japanese-gpt-1b/tree/mainをクローンした。これもクローンhttps://github.com/rinnakk/japanese-pretrained-models。
+まず https://huggingface.co/rinna/japanese-gpt-1b/tree/main をクローンした。これもクローン https://github.com/rinnakk/japanese-pretrained-models 
 ```
 git lfs install
-conda create -n hoboJUKI
+conda create -n hoboJUKI  pytho=3.10
 conda activate hoboJUKI
-cd pathto/japanese-pretrained-models
 pip install -r requirements.txt
 python -m unidic download
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113

@@ -6,3 +6,4 @@ sentencepiece
 tqdm
 fugashi
 unidic
+datasets

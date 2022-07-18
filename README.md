@@ -24,3 +24,11 @@ pip install torch torchvision torchaudio --extra-index-url https://download.pyto
 pip install transformers
 pip install sentencepiece
 ```
+## メモ
+https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
+
+https://github.com/npaka3/akane-talk/blob/main/docs/dataset.txt
+
+https://note.com/npaka/n/n8a435f0c8f69
+
+チャットデータの収集はほぼ完了なので、テキストを整形していく。どのような形式がいいのかを調査中。

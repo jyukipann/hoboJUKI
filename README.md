@@ -26,7 +26,8 @@ pip install sentencepiece
 ```
 pip install git+https://github.com/huggingface/transformers
 これもやった。trainでこれがないと怒られる。まじでこれやれば動きました。
-
+pip install sklearn
+これも必要でした。
 
 ## メモ
 https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
@@ -39,3 +40,26 @@ https://note.com/npaka/n/n8a435f0c8f69
     とりあえず、ツイートを一行ずつ書いたテキストにした。
 
 https://rooter.jp/ml/japanese-ad-text-generate/
+
+
+```
+python train/test_train.py \
+    --model_name_or_path=rinna/japanese-gpt-1b \
+    --train_file=dataset/tweet.txt \
+    --validation_file=dataset/tweet.txt \
+    --do_train \
+    --do_eval \
+    --num_train_epochs=1 \
+    --save_steps=5000 \
+    --save_total_limit=3 \
+    --per_device_train_batch_size=1 \
+    --per_device_eval_batch_size=1 \
+    --output_dir=output/ \
+    --use_fast_tokenizer=False
+```
+```
+python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False
+```
+```
+PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:100; python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False
+```

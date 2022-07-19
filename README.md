@@ -18,16 +18,12 @@ conda 環境を構築する。pythonバージョンは3.10として、すべてp
 git lfs install
 conda create -n hoboJUKI  pytho=3.10
 conda activate hoboJUKI
+pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
 pip install -r requirements.txt
 python -m unidic download
-pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
-pip install transformers
-pip install sentencepiece
-```
 pip install git+https://github.com/huggingface/transformers
+```
 これもやった。trainでこれがないと怒られる。まじでこれやれば動きました。
-pip install sklearn
-これも必要でした。
 
 ## メモ
 https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
@@ -58,8 +54,9 @@ python train/test_train.py \
     --use_fast_tokenizer=False
 ```
 ```
-python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False
+python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False --overwrite_output_dir
 ```
-```
-PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:100; python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False
-```
+
+ちなみに、japanese GPT-1b は、RTX 2070 8GB じゃ動きませんでした。
+RTX 3090 24GB でも動きませんでした。
+RTX A6000 48GB で試しています。

@@ -2,12 +2,13 @@ import torch
 from transformers import T5Tokenizer, AutoModelForCausalLM
 
 tokenizer = T5Tokenizer.from_pretrained("rinna/japanese-gpt-1b")
-tokenizer.add_tokens(["[TWT]","[REP]"])
+tokenizer.add_tokens(["[TWT]","[REP]", "[UNK]"])
 # tokenizer.add_special_tokens({"unk_token":"[UNK]"})
 
 text = "[CLS]<s>[SEP]</s>[TWT][REP]"
 text = "[REP][TWT][UNK]<unk>"
-token_ids = tokenizer.encode(text,add_special_tokens=False, return_tensors="pt")
+token_ids = tokenizer.encode(text,add_special_tokens=True, return_tensors="pt")
+# token_ids = tokenizer(text,add_special_tokens=True, return_tensors="pt")
 output = tokenizer.decode(token_ids.tolist()[0])
 print(output)
 print(token_ids.tolist()[0])

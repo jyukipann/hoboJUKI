@@ -27,6 +27,7 @@ pip install git+https://github.com/huggingface/transformers
 
 ## メモ
 https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
+./transformers/examples/language-modeling/run_clm.py」
 
 https://github.com/npaka3/akane-talk/blob/main/docs/dataset.txt
 
@@ -55,6 +56,10 @@ python train/test_train.py \
 ```
 ```
 python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/tweet.txt --validation_file=dataset/tweet.txt --do_train --do_eval --num_train_epochs=1 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output/ --use_fast_tokenizer=False --overwrite_output_dir
+```
+
+```
+python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_file=dataset/train.txt --validation_file=dataset/train.txt --do_train --do_eval --num_train_epochs=10 --save_steps=5000 --save_total_limit=3 --per_device_train_batch_size=1 --per_device_eval_batch_size=1 --output_dir=output_v1/ --use_fast_tokenizer=False --overwrite_output_dir
 ```
 
 ちなみに、japanese GPT-1b は、RTX 2070 8GB じゃ動きませんでした。

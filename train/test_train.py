@@ -364,8 +364,10 @@ def main():
     }
     if model_args.tokenizer_name:
         tokenizer = T5Tokenizer.from_pretrained(model_args.tokenizer_name, **tokenizer_kwargs)
+        tokenizer.add_tokens(["[TWT]","[REP]", "[UNK]"])
     elif model_args.model_name_or_path:
         tokenizer = T5Tokenizer.from_pretrained(model_args.model_name_or_path, **tokenizer_kwargs)
+        tokenizer.add_tokens(["[TWT]","[REP]", "[UNK]"])
     else:
         raise ValueError(
             "You are instantiating a new tokenizer from scratch. This is not supported by this script."
@@ -401,7 +403,7 @@ def main():
 
     def tokenize_function(examples):
         with CaptureLogger(tok_logger) as cl:
-            output = tokenizer(examples[text_column_name])
+            output = tokenizer(examples[text_column_name],add_special_tokens=False)
         # clm input could be much much longer than block_size
         if "Token indices sequence length is longer than the" in cl.out:
             tok_logger.warning(

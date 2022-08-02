@@ -10,6 +10,7 @@ if torch.cuda.is_available():
     model = model.to("cuda")
 
 text = "つぶやいて。"
+text = "<s>"
 token_ids = tokenizer.encode(text, add_special_tokens=False, return_tensors="pt")
 
 with torch.no_grad():

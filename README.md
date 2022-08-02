@@ -59,4 +59,4 @@ python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_fi
 
 ちなみに、japanese GPT-1b は、RTX 2070 8GB じゃ動きませんでした。
 RTX 3090 24GB でも動きませんでした。
-RTX A6000 48GB で試しています。
+RTX A6000 48GB で試しています。動きました。

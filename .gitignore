@@ -154,3 +154,4 @@ cython_debug/
 *.model
 output/
 output_v*/
+discord_bot/hoboJUKI_bot_IDs.py

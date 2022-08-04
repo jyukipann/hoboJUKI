@@ -22,6 +22,7 @@ pip install torch torchvision torchaudio --extra-index-url https://download.pyto
 pip install -r requirements.txt
 python -m unidic download
 pip install git+https://github.com/huggingface/transformers
+pip install git+https://github.com/Rapptz/discord.py.git
 ```
 これもやった。trainでこれがないと怒られる。まじでこれやれば動きました。
 

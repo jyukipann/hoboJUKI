@@ -8,6 +8,7 @@ tokenizer.add_tokens(["[TWT]","[REP]", "[UNK]"])
 text = "[CLS]<s>[SEP]</s>[TWT][REP]"
 text = "[REP][TWT][UNK]<unk>"
 token_ids = tokenizer.encode(text,add_special_tokens=True, return_tensors="pt")
+print(len(token_ids[0]))
 # token_ids = tokenizer(text,add_special_tokens=True, return_tensors="pt")
 output = tokenizer.decode(token_ids.tolist()[0])
 print(output)

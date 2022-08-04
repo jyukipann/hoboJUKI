@@ -155,3 +155,4 @@ cython_debug/
 output/
 output_v*/
 discord_bot/hoboJUKI_bot_IDs.py
+discordbot/hoboJUKI_IDs.py

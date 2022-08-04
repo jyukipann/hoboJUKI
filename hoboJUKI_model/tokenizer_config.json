@@ -1,0 +1,17 @@
+{
+  "additional_special_tokens": [],
+  "bos_token": "<s>",
+  "cls_token": "[CLS]",
+  "do_lower_case": false,
+  "eos_token": "</s>",
+  "extra_ids": 0,
+  "mask_token": "[MASK]",
+  "name_or_path": "rinna/japanese-gpt-1b",
+  "pad_token": "[PAD]",
+  "sep_token": "[SEP]",
+  "sp_model_kwargs": {},
+  "special_tokens_map_file": "/home1/tanimoto.j/.cache/huggingface/transformers/337b8f59a98b2ba0fdd2aab294bb07abf840584bf59590f4ad89502c4284d5e4.9049458ebcd1cf666b7b0a046aa394597f12e611077571cfc86e0938f8675d82",
+  "tokenizer_class": "T5Tokenizer",
+  "unk_token": "<unk>",
+  "use_fast": false
+}

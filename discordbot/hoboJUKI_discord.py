@@ -12,14 +12,16 @@ class HoboJUKI(discord.Client):
         print("loading models")
         self.mention_pattern = None
         self.mention_user_pattern = re.compile(f'<@\d+>')
-        self.last_message_queue = deque([], maxlen=5)
         self.reply_sub_words = re.compile("<s>|</s>|[UNK]|<unk>")
         self.s_tag = re.compile("<s>|</s>")
         self.target_channel_id = 790812986599931967
         # self.target_channel_id = 1004647945435623454 #テストチャンネル
-
+        self.message_queue_max_length = 5
+        self.last_message_queues = {self.target_channel_id:deque(maxlen=self.message_queue_max_length)}
         self.tokenizer = T5Tokenizer.from_pretrained("rinna/japanese-gpt-1b")
+        self.tokenizer.add_tokens(["[TWT]","[REP]", "[UNK]"])
         self.model = AutoModelForCausalLM.from_pretrained("hoboJUKI_model/")
+        self.model.resize_token_embeddings(len(self.tokenizer))
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
 
@@ -47,8 +49,6 @@ class HoboJUKI(discord.Client):
                 # early_stopping=True,
             )
         reply = self.tokenizer.decode(output_ids.tolist()[0][input_message_count:])
-        input_message = self.s_tag.sub(" ",input_message)
-        reply = reply.replace(input_message,"")
         reply = self.reply_sub_words.sub("", reply)
         return reply
 
@@ -57,28 +57,52 @@ class HoboJUKI(discord.Client):
         print('Logged on as', self.user)
 
     async def on_message(self, message):
-        if message.channel.id != self.target_channel_id:
+        # dm
+        if message.author != self.user:
+            if message.author.dm_channel is None:
+                await message.author.create_dm()
+            if message.author.dm_channel.id == message.channel.id:
+                await self.on_dm_message(message)
+                return
+        
+        # hoboJUKI channel
+        if message.channel.id == self.target_channel_id:
+            await self.on_hoboJUKI_channel_message(message)
             return
+
+    async def on_dm_message(self,message):
+        if message.channel.id not in self.last_message_queues:
+            self.last_message_queues[message.author.dm_channel.id] = deque(maxlen=self.message_queue_max_length)
+        message_queue = self.last_message_queues[message.author.dm_channel.id]
+
+        if message.author == self.user:
+            message_queue.append(f"[REP][ほぼじゅき]<s>{message.content}</s>")
+            return
+        else:
+            author_nick_name = message.author.name
+            message_queue.append(f"[{author_nick_name}]<s>{message.content}</s>")
+            reply_message = None
+            reply_message = self.generate_reply("".join(message_queue))
+            if reply_message is not None:
+                await message.channel.send(reply_message)
+        
+
+    async def on_hoboJUKI_channel_message(self,message):
         author_nick_name = message.author.nick
         if author_nick_name is None:
             author_nick_name = message.author.name
         message_content = message.content
         # don't respond to ourselves
+        message_queue = self.last_message_queues[message.channel.id]
         if message.author == self.user:
-            self.last_message_queue.append(
-                f"[REP][ほぼじゅき]<s>{message_content}</s>")
+            message_queue.append(f"[REP][ほぼじゅき]<s>{message_content}</s>")
             return
         else:
-            self.last_message_queue.append(
-                f"[{author_nick_name}]<s>{message_content}</s>")
-        if self.mention_pattern.search(message.content) is not None:
-            # print("meintined")
+            message_queue.append(f"[{author_nick_name}]<s>{message_content}</s>")
             reply_message = None
-            reply_message = self.generate_reply(
-                "".join(self.last_message_queue))
+            reply_message = self.generate_reply("".join(message_queue))
             if reply_message is not None:
                 await message.channel.send(reply_message)
-
 
 if __name__ == "__main__":
     intents = discord.Intents.default()

@@ -1,10 +1,10 @@
 import discord
+import dmwebhook
 import hoboJUKI_IDs
 import re
 from collections import deque
 import torch
 from transformers import T5Tokenizer, AutoModelForCausalLM
-
 
 class HoboJUKI(discord.Client):
     def __init__(self, *, intents, **options) -> None:
@@ -12,7 +12,7 @@ class HoboJUKI(discord.Client):
         print("loading models")
         self.mention_pattern = None
         self.mention_user_pattern = re.compile(f'<@\d+>')
-        self.reply_sub_words = re.compile("<s>|</s>|[UNK]|<unk>")
+        self.reply_sub_words = re.compile("<s>|</s>|[UNK]|<unk>|\[\]")
         self.s_tag = re.compile("<s>|</s>")
         self.target_channel_id = 790812986599931967
         # self.target_channel_id = 1004647945435623454 #テストチャンネル
@@ -24,6 +24,7 @@ class HoboJUKI(discord.Client):
         self.model.resize_token_embeddings(len(self.tokenizer))
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
+        self.dm_logger = None
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)
@@ -83,6 +84,9 @@ class HoboJUKI(discord.Client):
             message_queue.append(f"[{author_nick_name}]<s>{message.content}</s>")
             reply_message = None
             reply_message = self.generate_reply("".join(message_queue))
+            if self.dm_logger is not None:
+                self.dm_logger.send_message(message.content,author_nick_name)
+                self.dm_logger.send_message(reply_message,"ほぼじゅき")
             if reply_message is not None:
                 await message.channel.send(reply_message)
         
@@ -108,4 +112,5 @@ if __name__ == "__main__":
     intents = discord.Intents.default()
     intents.message_content = True
     client = HoboJUKI(intents=intents)
+    client.dm_logger = dmwebhook.hoboJUKIdmLogger(hoboJUKI_IDs.webhook_url)
     client.run(hoboJUKI_IDs.token)

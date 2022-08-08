@@ -28,7 +28,7 @@ class HoboJUKI(discord.Client):
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
         self.dm_logger = None
-        self.reply_sleep_time_range = [3,30]
+        self.reply_sleep_time_range = [3,15]
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)

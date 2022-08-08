@@ -5,6 +5,9 @@ import re
 from collections import deque
 import torch
 from transformers import T5Tokenizer, AutoModelForCausalLM
+import time
+import asyncio
+import random
 
 class HoboJUKI(discord.Client):
     def __init__(self, *, intents, **options) -> None:
@@ -25,6 +28,7 @@ class HoboJUKI(discord.Client):
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
         self.dm_logger = None
+        self.reply_sleep_time_range = [3,30]
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)
@@ -33,24 +37,41 @@ class HoboJUKI(discord.Client):
         token_ids = self.tokenizer.encode(
             input_message, add_special_tokens=False, return_tensors="pt")
         input_message_count = len(token_ids[0])
-        with torch.no_grad():
-            # print("generating")
-            output_ids = self.model.generate(
-                token_ids.to(self.model.device),
-                max_length=1000,
-                min_length=15,
-                do_sample=True,
-                top_k=500,
-                top_p=0.95,
-                pad_token_id=self.tokenizer.pad_token_id,
-                bos_token_id=self.tokenizer.bos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-                bad_word_ids=[[self.tokenizer.unk_token_id]],
-                num_beams=5,
-                # early_stopping=True,
-            )
-        reply = self.tokenizer.decode(output_ids.tolist()[0][input_message_count:])
-        reply = self.reply_sub_words.sub("", reply)
+        while(True):
+            gen_args = {
+                    "max_length":1000,
+                    "min_length":15,
+                    "do_sample":True,
+                    "top_k":700,
+                    "top_p":0.95,
+                    "pad_token_id":self.tokenizer.pad_token_id,
+                    "bos_token_id":self.tokenizer.bos_token_id,
+                    "eos_token_id":self.tokenizer.eos_token_id,
+                    "bad_word_ids":[[self.tokenizer.unk_token_id]],
+                    "num_beams":random.randint(1,3),
+                    "early_stopping":random.choice([True,False]),
+            }
+
+            with torch.no_grad():
+                # print("generating")
+                output_ids = self.model.generate(
+                    token_ids.to(self.model.device),
+                    max_length=1000,
+                    min_length=15,
+                    do_sample=True,
+                    top_k=500,
+                    top_p=0.95,
+                    pad_token_id=self.tokenizer.pad_token_id,
+                    bos_token_id=self.tokenizer.bos_token_id,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    bad_word_ids=[[self.tokenizer.unk_token_id]],
+                    num_beams=5,
+                    # early_stopping=True,
+                )
+            reply = self.tokenizer.decode(output_ids.tolist()[0][input_message_count:])
+            reply = self.reply_sub_words.sub("", reply)
+            if reply != "[]":
+                break
         return reply
 
     async def on_ready(self):
@@ -80,15 +101,21 @@ class HoboJUKI(discord.Client):
             message_queue.append(f"[REP][ほぼじゅき]<s>{message.content}</s>")
             return
         else:
-            author_nick_name = message.author.name
-            message_queue.append(f"[{author_nick_name}]<s>{message.content}</s>")
-            reply_message = None
-            reply_message = self.generate_reply("".join(message_queue))
-            if self.dm_logger is not None:
-                self.dm_logger.send_message(message.content,author_nick_name)
-                self.dm_logger.send_message(reply_message,"ほぼじゅき")
-            if reply_message is not None:
-                await message.channel.send(reply_message)
+            async with message.channel.typing():
+                sleep_time = random.uniform(*self.reply_sleep_time_range)
+                start = time.time()
+                author_nick_name = message.author.name
+                message_queue.append(f"[{author_nick_name}]<s>{message.content}</s>")
+                reply_message = None
+                reply_message = self.generate_reply("".join(message_queue))
+                generate_end = time.time()
+                if self.dm_logger is not None:
+                    self.dm_logger.send_message(message.content,author_nick_name)
+                    self.dm_logger.send_message(reply_message,"ほぼじゅき")
+                if reply_message is not None:
+                    await asyncio.sleep(sleep_time-(generate_end-start))
+                    await message.channel.send(reply_message)
+
         
 
     async def on_hoboJUKI_channel_message(self,message):
@@ -102,11 +129,16 @@ class HoboJUKI(discord.Client):
             message_queue.append(f"[REP][ほぼじゅき]<s>{message_content}</s>")
             return
         else:
-            message_queue.append(f"[{author_nick_name}]<s>{message_content}</s>")
-            reply_message = None
-            reply_message = self.generate_reply("".join(message_queue))
-            if reply_message is not None:
-                await message.channel.send(reply_message)
+            async with message.channel.typing():
+                sleep_time = random.uniform(*self.reply_sleep_time_range)
+                start = time.time()
+                message_queue.append(f"[{author_nick_name}]<s>{message_content}</s>")
+                reply_message = None
+                reply_message = self.generate_reply("".join(message_queue))
+                generate_end = time.time()
+                if reply_message is not None:
+                    await asyncio.sleep(sleep_time-(generate_end-start))
+                    await message.channel.send(reply_message)
 
 if __name__ == "__main__":
     intents = discord.Intents.default()

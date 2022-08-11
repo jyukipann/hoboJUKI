@@ -28,7 +28,7 @@ class HoboJUKI(discord.Client):
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
         self.dm_logger = None
-        self.reply_sleep_time_range = [3,15]
+        self.reply_sleep_time_range = [1,5]
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)
@@ -56,17 +56,7 @@ class HoboJUKI(discord.Client):
                 # print("generating")
                 output_ids = self.model.generate(
                     token_ids.to(self.model.device),
-                    max_length=1000,
-                    min_length=15,
-                    do_sample=True,
-                    top_k=500,
-                    top_p=0.95,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                    bos_token_id=self.tokenizer.bos_token_id,
-                    eos_token_id=self.tokenizer.eos_token_id,
-                    bad_word_ids=[[self.tokenizer.unk_token_id]],
-                    num_beams=5,
-                    # early_stopping=True,
+                    **gen_args,
                 )
             reply = self.tokenizer.decode(output_ids.tolist()[0][input_message_count:])
             reply = self.reply_sub_words.sub("", reply)
@@ -113,7 +103,8 @@ class HoboJUKI(discord.Client):
                     self.dm_logger.send_message(message.content,author_nick_name)
                     self.dm_logger.send_message(reply_message,"ほぼじゅき")
                 if reply_message is not None:
-                    await asyncio.sleep(sleep_time-(generate_end-start))
+                    if len(reply_message) > 4:
+                        await asyncio.sleep(sleep_time-(generate_end-start))
                     await message.channel.send(reply_message)
 
         
@@ -137,7 +128,8 @@ class HoboJUKI(discord.Client):
                 reply_message = self.generate_reply("".join(message_queue))
                 generate_end = time.time()
                 if reply_message is not None:
-                    await asyncio.sleep(sleep_time-(generate_end-start))
+                    if len(reply_message) > 4:
+                        await asyncio.sleep(sleep_time-(generate_end-start))
                     await message.channel.send(reply_message)
 
 if __name__ == "__main__":

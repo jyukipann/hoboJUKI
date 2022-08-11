@@ -29,6 +29,7 @@ class HoboJUKI(discord.Client):
             self.model = self.model.to("cuda")
         self.dm_logger = None
         self.reply_sleep_time_range = [1,5]
+        self.last_message_times = {}
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)
@@ -83,10 +84,16 @@ class HoboJUKI(discord.Client):
             return
 
     async def on_dm_message(self,message):
-        if message.channel.id not in self.last_message_queues:
+        if message.channel.id not in self.last_message_queues: 
             self.last_message_queues[message.author.dm_channel.id] = deque(maxlen=self.message_queue_max_length)
         message_queue = self.last_message_queues[message.author.dm_channel.id]
+        if message.channel.id not in self.last_message_times:
+            self.last_message_times[message.channel.id] = time.time()
+        if time.time() - self.last_message_times[message.channel.id] > 3600:
+            message_queue = deque(maxlen=self.message_queue_max_length)
+        self.last_message_times[message.channel.id] = time.time()
 
+        
         if message.author == self.user:
             message_queue.append(f"[REP][ほぼじゅき]<s>{message.content}</s>")
             return
@@ -110,12 +117,17 @@ class HoboJUKI(discord.Client):
         
 
     async def on_hoboJUKI_channel_message(self,message):
+        message_queue = self.last_message_queues[message.channel.id]
+        if message.channel.id not in self.last_message_times:
+            self.last_message_times[message.channel.id] = time.time()
+        if time.time() - self.last_message_times[message.channel.id] > 3600:
+            message_queue = deque(maxlen=self.message_queue_max_length)
+        self.last_message_times[message.channel.id] = time.time()
         author_nick_name = message.author.nick
         if author_nick_name is None:
             author_nick_name = message.author.name
         message_content = message.content
         # don't respond to ourselves
-        message_queue = self.last_message_queues[message.channel.id]
         if message.author == self.user:
             message_queue.append(f"[REP][ほぼじゅき]<s>{message_content}</s>")
             return

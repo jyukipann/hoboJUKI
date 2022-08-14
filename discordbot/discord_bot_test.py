@@ -1,14 +1,13 @@
 import discord
 import hoboJUKI_IDs
 import re
-from collections import deque
-import torch
-from transformers import T5Tokenizer, AutoModelForCausalLM
+from discord.ext import tasks
 
 
 class HoboJUKI(discord.Client):
     def __init__(self, *, intents, **options) -> None:
         super().__init__(intents=intents, **options)
+        self.target_channel_id = 790812986599931967
 
     async def on_ready(self):
         self.mention_pattern = re.compile(f'<@{self.user.id}>')
@@ -21,6 +20,11 @@ class HoboJUKI(discord.Client):
             await message.author.create_dm()
         if message.author.dm_channel.id == message.channel.id:
             print("here is dm")
+
+    @tasks.loop()
+    async def loop():
+        print("loop")
+
 
 
 

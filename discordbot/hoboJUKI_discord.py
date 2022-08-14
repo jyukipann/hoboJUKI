@@ -1,4 +1,5 @@
 import discord
+from discord.ext import tasks
 import dmwebhook
 import hoboJUKI_IDs
 import re
@@ -30,6 +31,40 @@ class HoboJUKI(discord.Client):
         self.dm_logger = None
         self.reply_sleep_time_range = [1,5]
         self.last_message_times = {}
+        self.last_message_times[self.target_channel_id] = time.time()
+        self.next_tweet_date = None
+
+    def generate_tweet(self):
+        input_message = "[TWT]<s>"
+        token_ids = self.tokenizer.encode(input_message, add_special_tokens=False, return_tensors="pt")
+        gen_args = {
+                "max_length":1000,
+                "min_length":15,
+                "do_sample":True,
+                "top_k":700,
+                "top_p":0.50,
+                "pad_token_id":self.tokenizer.pad_token_id,
+                "bos_token_id":self.tokenizer.bos_token_id,
+                "eos_token_id":self.tokenizer.eos_token_id,
+                "bad_word_ids":[[self.tokenizer.unk_token_id]],
+                "num_beams":random.randint(1,3),
+                "early_stopping":random.choice([True,False]),
+        }
+        if random.random() > 0.5:
+            del gen_args["num_beams"]
+        if random.random() > 0.5:
+            del gen_args["early_stopping"]
+
+        with torch.no_grad():
+            # print("generating")
+            output_ids = self.model.generate(
+                token_ids.to(self.model.device),
+                **gen_args,
+            )
+
+        tweet = self.tokenizer.decode(output_ids.tolist()[0][2:])
+        tweet = tweet.replace("</s>", "")
+        return tweet
 
     def generate_reply(self, input_message):
         input_message = self.mention_user_pattern.sub("", input_message)
@@ -40,17 +75,17 @@ class HoboJUKI(discord.Client):
         input_message_count = len(token_ids[0])
         while(True):
             gen_args = {
-                    "max_length":1000,
-                    "min_length":15,
-                    "do_sample":True,
-                    "top_k":700,
-                    "top_p":0.95,
-                    "pad_token_id":self.tokenizer.pad_token_id,
-                    "bos_token_id":self.tokenizer.bos_token_id,
-                    "eos_token_id":self.tokenizer.eos_token_id,
-                    "bad_word_ids":[[self.tokenizer.unk_token_id]],
-                    "num_beams":random.randint(1,3),
-                    "early_stopping":random.choice([True,False]),
+                "max_length":1000,
+                "min_length":15,
+                "do_sample":True,
+                "top_k":700,
+                "top_p":0.95,
+                "pad_token_id":self.tokenizer.pad_token_id,
+                "bos_token_id":self.tokenizer.bos_token_id,
+                "eos_token_id":self.tokenizer.eos_token_id,
+                "bad_word_ids":[[self.tokenizer.unk_token_id]],
+                "num_beams":random.randint(1,3),
+                "early_stopping":random.choice([True,False]),
             }
 
             with torch.no_grad():
@@ -61,13 +96,18 @@ class HoboJUKI(discord.Client):
                 )
             reply = self.tokenizer.decode(output_ids.tolist()[0][input_message_count:])
             reply = self.reply_sub_words.sub("", reply)
-            if reply != "[]":
+            reply = reply.replace("[]", "")
+            if len(reply) >= 1:
                 break
         return reply
 
     async def on_ready(self):
         self.mention_pattern = re.compile(f'<@{self.user.id}>')
         print('Logged on as', self.user)
+        target_channel = self.get_channel(self.target_channel_id)
+        tweet = self.generate_tweet()
+        await target_channel.send(tweet)
+        self.myloop.start()
 
     async def on_message(self, message):
         # dm
@@ -143,6 +183,19 @@ class HoboJUKI(discord.Client):
                     if len(reply_message) > 4:
                         await asyncio.sleep(sleep_time-(generate_end-start))
                     await message.channel.send(reply_message)
+
+    @tasks.loop(minutes=15)
+    async def myloop(self):
+        if time.time() - self.last_message_times[self.target_channel_id] > 3600:
+            if self.next_tweet_date is None:
+                self.next_tweet_date = time.time() + random.randint(0,3600*6)
+            else:
+                if self.next_tweet_date - time.time() <= 0:
+                    # send tweet
+                    target_channel = self.get_channel(self.target_channel_id)
+                    tweet = self.generate_tweet()
+                    await target_channel.send(tweet)
+                    self.next_tweet_date = time.time() + random.randint(0,3600*6)
 
 if __name__ == "__main__":
     intents = discord.Intents.default()

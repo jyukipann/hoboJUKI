@@ -191,10 +191,11 @@ class HoboJUKI(discord.Client):
                 self.next_tweet_date = time.time() + random.randint(0,3600*6)
             else:
                 if self.next_tweet_date - time.time() <= 0:
-                    # send tweet
-                    target_channel = self.get_channel(self.target_channel_id)
-                    tweet = self.generate_tweet()
-                    await target_channel.send(tweet)
+                    if False: # dispable tweet
+                        # send tweet
+                        target_channel = self.get_channel(self.target_channel_id)
+                        tweet = self.generate_tweet()
+                        await target_channel.send(tweet)
                     self.next_tweet_date = time.time() + random.randint(0,3600*6)
 
 if __name__ == "__main__":

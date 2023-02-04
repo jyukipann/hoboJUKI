@@ -11,7 +11,7 @@
 
 チャットボットとしての体裁を整える
 
-## 環境構築
+# 環境構築
 conda 環境を構築する。pythonバージョンは3.10として、すべてpipでインストールした
 まず https://huggingface.co/rinna/japanese-gpt-1b/tree/main をクローンした。これもクローン https://github.com/rinnakk/japanese-pretrained-models 
 ```
@@ -26,7 +26,7 @@ pip install git+https://github.com/Rapptz/discord.py.git
 ```
 これもやった。trainでこれがないと怒られる。まじでこれやれば動きました。
 
-## メモ
+# メモ
 https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
 ./transformers/examples/language-modeling/run_clm.py」
 
@@ -66,3 +66,25 @@ python train/test_train.py --model_name_or_path=rinna/japanese-gpt-1b --train_fi
 ちなみに、japanese GPT-1b は、RTX 2070 8GB じゃ動きませんでした。
 RTX 3090 24GB でも動きませんでした。
 RTX A6000 48GB で試しています。動きました。
+
+# 実行方法
+```cmd
+cd W:\tanimoto.j\workspace\GitHub\hoboJUKI
+W:
+conda activate hoboJUKI
+python discordbot\hoboJUKI_discord.py
+```
+```
+cd W:\tanimoto.j\workspace\GitHub\hoboJUKI & W: & conda activate hoboJUKI & python discordbot\hoboJUKI_discord.py
+```
+
+# アイデア
+## 前回は学習回しすぎ
+epoch300は多すぎ。val用のデータセットは必要。
+
+## 明示的に無視したい
+無視することで会話を終わらせる。次に会話が続くかを推論する必要がある。
+データセットの変更は必須。
+
+## 再学習の方法
+データセットどうする？

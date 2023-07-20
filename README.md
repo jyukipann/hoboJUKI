@@ -14,17 +14,28 @@
 # 環境構築
 conda 環境を構築する。pythonバージョンは3.10として、すべてpipでインストールした
 まず https://huggingface.co/rinna/japanese-gpt-1b/tree/main をクローンした。これもクローン https://github.com/rinnakk/japanese-pretrained-models 
-```
+```cmd
 git lfs install
 conda create -n hoboJUKI  python=3.10
 conda activate hoboJUKI
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install transformers
+pip install git+https://github.com/huggingface/peft.git
+pip install accelerate bitsandbytes
+pip install scipy
+pip install sentencepiece
+
 pip install -r requirements.txt
 python -m unidic download
-pip install git+https://github.com/huggingface/transformers
 pip install git+https://github.com/Rapptz/discord.py.git
 ```
 これもやった。trainでこれがないと怒られる。まじでこれやれば動きました。
+
+```
+J: & cd J:\workspace\GitHub\hoboJUKI & conda activate hoboJUKI
+```
 
 # メモ
 https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling
@@ -88,3 +99,17 @@ epoch300は多すぎ。val用のデータセットは必要。
 
 ## 再学習の方法
 データセットどうする？
+
+
+## 進捗（2023/07/15）
+[qiitaに寄稿した記事](https://qiita.com/jyukipann/items/07c7b156b2dc5a126b30)でhoboJUKIのモデルを学習しました。
+まぁ考えなきゃいけないことはまだまだあるけど、程よくいい感じにモデルは出来た。
+48時間程度A6000を回した。
+`hoboJUKI-3.6b/source`にbotのコードを再構築していく。
+discordpyを最新にしたいので、破壊的な環境操作が起きるかもしれない。
+```cmd.exe
+pip install update discord.py
+```
+
+(これ)[https://qiita.com/selllous/items/fbaa2c3d2d504e436b17]でbitsandbytesやるしかないかな。
+https://qiita.com/selllous/items/c4880767da45173227c1
